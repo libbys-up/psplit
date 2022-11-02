@@ -1,0 +1,24 @@
+{
+  "name": "psplit",
+  "version": "0.0.1",
+  "author": "Steven Libby <libbys@up.edu>",
+  "synopsis": "Automatically split Prelude into smaller modules for compilation",
+  "category": [ "Compilers" ],
+  "license": "BSD-3-Clause",
+  "licenseFile": "LICENSE",
+  "dependencies": {
+        "currypp"            : ">= 3.0.0",
+        "flatcurry"          : ">= 3.0.0",
+        "setfunctions"       : ">= 3.0.0",
+        "wl-pprint"          : ">= 3.0.0",
+        "opt-parse"          : ">= 3.0.0",
+        "icurry"             : ">= 3.2.0",
+        "currypath"          : ">= 3.0.0",
+        "finite-map"         : ">= 3.0.0",
+        "searchtree"         : ">= 3.0.0"
+  },
+    "executable": {
+        "name": "psplit",
+        "main": "Main"
+    }
+}
