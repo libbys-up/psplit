@@ -19,27 +19,27 @@ f fs = case id $## nub (map (baseName . funcName) fs) of
              verts   = map toInt names
              fun i   = fromJust (lookup i funMap)
              funMap  = fromList (zip [0..] names)
-             edges   = nub [(toInt (baseName (funcName f)), toInt c) | f <- fs,
-                                                                       c <- funcCalls f,
-                                                                       baseName (funcName f) /= c]
-         in zip names verts
+             edges   = mergeMap calls fs
+             calls f = map (\c -> (toInt (baseName (funcName f)), toInt c)) (funcCalls f)
+--         in zip names verts
+         in edges
 --         in case id $## edges of
 --              es -> es -- scc verts (take 200 es)
 
 funcCalls :: FuncDecl -> [String]
 funcCalls (Func _ _ _ _ (External _)) = []
-funcCalls (Func _ _ _ _ (Rule _ b)) = getCalls b
+funcCalls (Func n _ _ _ (Rule _ b)) = getCalls n b
  where 
-   getCalls (Var _)        = []
-   getCalls (Lit _)        = []
-   getCalls (Let vs e)     = mergeMap (getCalls . snd) vs ++- getCalls e
-   getCalls (Or e1 e2)     = getCalls e1 ++- getCalls e2
-   getCalls (Free _ e)     = getCalls e
-   getCalls (Comb ct n es) = if isFunc ct
-                             then [baseName  n] ++- mergeMap getCalls es
-                             else mergeMap getCalls es
-   getCalls (Case _ e bs)  = getCalls e ++- mergeMap (getCalls . branchExpr) bs
-   getCalls (Typed e _)    = getCalls e
+   getCalls _ (Var _)        = []
+   getCalls _ (Lit _)        = []
+   getCalls n (Let vs e)     = mergeMap (getCalls n . snd) vs ++- getCalls n e
+   getCalls n (Or e1 e2)     = getCalls n e1 ++- getCalls n e2
+   getCalls n (Free _ e)     = getCalls n e
+   getCalls n (Comb ct f es) = if isFunc ct && baseName n /= baseName f
+                               then [baseName f] ++- mergeMap (getCalls n) es
+                               else mergeMap (getCalls n) es
+   getCalls n (Case _ e bs)  = getCalls n e ++- mergeMap (getCalls n . branchExpr) bs
+   getCalls n (Typed e _)    = getCalls n e
 
 isFunc :: CombType -> Bool
 isFunc FuncCall         = True
